@@ -1,26 +1,19 @@
-package com.nabdroid313.tattoostore;
+package com.nabdroid313.tattoostore.activities;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-import android.Manifest;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 
-import android.os.Bundle;
+import com.nabdroid313.tattoostore.PaintView;
+import com.nabdroid313.tattoostore.R;
 
 import java.util.UUID;
 
@@ -29,9 +22,8 @@ public class DrawingActivity extends AppCompatActivity {
 
     private PaintView paintView;
     private int defaultColor;
-    private int STORAGE_PERMISSION_CODE = 1;
-    private Button blackButton, redButton, greenButton, blueButton, fatLineButton, thinLineButton;
-    private ImageView undoIV, redoIV, clearIV, saveIV;
+    private Button blackButton, redButton, greenButton, blueButton;
+    private ImageView undoIV, redoIV, clearIV, saveIV, fatLineIV, thinLineIV;
 
 
 
@@ -42,7 +34,6 @@ public class DrawingActivity extends AppCompatActivity {
         init();
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
-
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         paintView.initialise(displayMetrics);
         paintView.setStrokeWidth(10);
@@ -51,7 +42,7 @@ public class DrawingActivity extends AppCompatActivity {
 
 
 
-//---------------------------blackButton-----------------------------------------------------------------------
+//---------------------------blackButton------------------------------------------------------------------
         blackButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -62,7 +53,7 @@ public class DrawingActivity extends AppCompatActivity {
 
         });
 
-//---------------------------redButton-----------------------------------------------------------------------
+//---------------------------redButton--------------------------------------------------------------------
         redButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -74,7 +65,7 @@ public class DrawingActivity extends AppCompatActivity {
 
         });
 
-//----------------------------blueButton----------------------------------------------------------------------
+//----------------------------blueButton-------------------------------------------------------------------
         blueButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -86,7 +77,7 @@ public class DrawingActivity extends AppCompatActivity {
 
         });
 
-//------------------------------greenButton--------------------------------------------------------------------
+//------------------------------greenButton---------------------------------------------------------------
         greenButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -115,7 +106,7 @@ public class DrawingActivity extends AppCompatActivity {
             }
         });
 
-//------------------------------clearIV--------------------------------------------------------------------
+//---------------------------------clearIV-----------------------------------------------------------------
         clearIV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,11 +115,12 @@ public class DrawingActivity extends AppCompatActivity {
             }
         });
 
-//---------------------------------saveIV-----------------------------------------------------------------
+//---------------------------------saveIV------------------------------------------------------------------
         saveIV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                paintView.deleteCursor();
                 paintView.setDrawingCacheEnabled(true);
                 String imgSaved = MediaStore.Images.Media.insertImage(getContentResolver(), paintView.getDrawingCache(), String.valueOf(UUID.randomUUID()), "Paintings");
                 if (imgSaved != null){
@@ -139,10 +131,11 @@ public class DrawingActivity extends AppCompatActivity {
                     Toast.makeText(DrawingActivity.this, "Error! Image didn't saved!", Toast.LENGTH_SHORT).show();
                 }
                 paintView.destroyDrawingCache();
+
             }
         });
-//---------------------------------fatLineButton-----------------------------------------------------------------
-        fatLineButton.setOnClickListener(new View.OnClickListener() {
+//---------------------------------fatLineButton-----------------------------------------------------------
+        fatLineIV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 paintView.setStrokeWidth(40);
@@ -152,8 +145,8 @@ public class DrawingActivity extends AppCompatActivity {
 
 
 
-//---------------------------------ThinlineButton-----------------------------------------------------------------
-        thinLineButton.setOnClickListener(new View.OnClickListener() {
+//---------------------------------ThinlineButton----------------------------------------------------------
+        thinLineIV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 paintView.setStrokeWidth(10);
@@ -170,8 +163,8 @@ public class DrawingActivity extends AppCompatActivity {
         redButton = findViewById(R.id.red_color);
         greenButton = findViewById(R.id.green_color);
         blueButton = findViewById(R.id.blue_color);
-        fatLineButton = findViewById(R.id.fatLineButton);
-        thinLineButton = findViewById(R.id.thinLineButton);
+        fatLineIV = findViewById(R.id.fatLineButton);
+        thinLineIV = findViewById(R.id.thinLineButton);
         undoIV = findViewById(R.id.undoIV);
         redoIV = findViewById(R.id.redoIV);
         saveIV = findViewById(R.id.saveIV);

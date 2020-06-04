@@ -1,14 +1,13 @@
-package com.nabdroid313.tattoostore;
+package com.nabdroid313.tattoostore.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.ProgressBar;
+
+import com.nabdroid313.tattoostore.R;
 
 public class SplashScreen extends AppCompatActivity {
 

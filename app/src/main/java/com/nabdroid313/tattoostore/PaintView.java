@@ -24,10 +24,15 @@ import java.util.ArrayList;
 public class PaintView extends View {
     public static int BRUSH_SIZE = 10;
     public static final int DEFAULT_COLOR = Color.BLACK;
-    public static final int DEFAULT_BG_COLOR = Color.rgb(228,162, 118);
+    public static final int DEFAULT_BG_COLOR = Color.rgb(228, 162, 118);
     private static final float TOUCH_TOLERANCE = 4;
 
-    private float mX, mY;
+
+    private float mX = 300, mY = -300;
+    private float lastX, lastY;
+    private boolean checkSecondTouch = false;
+    private boolean firstTouch = false;
+    private boolean previousTouchExist = false;
     private Path mPath;
     private Paint mPaint;
     private int currentColor;
@@ -61,7 +66,7 @@ public class PaintView extends View {
         cursorMachine = new CursorMachine(getResources());
     }
 
-    public void initialise (DisplayMetrics displayMetrics) {
+    public void initialise(DisplayMetrics displayMetrics) {
 
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
@@ -97,8 +102,8 @@ public class PaintView extends View {
     }
 
 
+    private void touchStart(float x, float y) {
 
-    private void touchStart (float x, float y) {
 
         mPath = new Path();
 
@@ -111,14 +116,15 @@ public class PaintView extends View {
         mX = x;
         mY = y;
 
+
     }
 
 
-
-    private void touchMove (float x, float y) {
+    private void touchMove(float x, float y) {
 
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
+
 
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
 
@@ -127,21 +133,24 @@ public class PaintView extends View {
             mX = x;
             mY = y;
 
+
         }
 
     }
 
-    private void touchUp () {
-
+    private void touchUp() {
         mPath.lineTo(mX, mY);
-
     }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        float x = event.getX()-100;
-        float y = event.getY()-100;
+        float x, y;
+
+
+            x = event.getRawX();
+            y = event.getRawY()-200;
 
         switch (event.getAction()) {
 
@@ -151,29 +160,37 @@ public class PaintView extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 touchUp();
+                saveLastposition(x, y); //overWrite lastX & lastY
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
+
                 touchMove(x, y);
                 invalidate();
                 break;
 
         }
-
         return true;
-
     }
 
-    public void clear () {
 
+    private void saveLastposition(float x, float y) {
+        lastX = x;
+        lastY = y;
+        Toast.makeText(getContext(), "lastX: "+x+" LastY: "+y, Toast.LENGTH_SHORT).show();
+        previousTouchExist = true;
+    }
+
+
+
+    public void clear() {
         backgroundColor = DEFAULT_BG_COLOR;
-
         paths.clear();
         invalidate();
 
     }
 
-    public void undo () {
+    public void undo() {
 
         if (paths.size() > 0) {
 
@@ -188,7 +205,12 @@ public class PaintView extends View {
 
     }
 
-    public void redo () {
+    public void deleteCursor() {
+        setColor(Color.TRANSPARENT);
+
+    }
+
+    public void redo() {
 
         if (undo.size() > 0) {
 
@@ -203,20 +225,20 @@ public class PaintView extends View {
 
     }
 
-    public void setStrokeWidth (int width) {
+    public void setStrokeWidth(int width) {
 
         strokeWidth = width;
 
     }
 
-    public void setColor (int color) {
+    public void setColor(int color) {
 
         currentColor = color;
 
     }
 
     @SuppressLint("WrongThread")
-    public void saveImage () {
+    public void saveImage() {
 
         int count = 0;
 
