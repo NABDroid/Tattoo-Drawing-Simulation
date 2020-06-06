@@ -2,6 +2,8 @@ package com.nabdroid313.tattoostore.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -19,7 +21,8 @@ public class DrawingActivity extends AppCompatActivity implements View.OnClickLi
     private PaintView paintView;
     private int defaultColor;
     private Button blackButton, redButton, greenButton, blueButton, submitButton;
-    private ImageView undoIV, redoIV, fatLineIV, thinLineIV;
+    private ImageView undoIV, redoIV, fatLineIV, thinLineIV, demoImage;
+    int level = 1;
 
 
     @Override
@@ -28,11 +31,10 @@ public class DrawingActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_drawing);
         init();
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        paintView.initialise(displayMetrics);
+//        DisplayMetrics displayMetrics = new DisplayMetrics();
+//        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        paintView.initialise(level);
         paintView.setStrokeWidth(10);
-
         blackButton.setOnClickListener(this);
         redButton.setOnClickListener(this);
         blueButton.setOnClickListener(this);
@@ -43,10 +45,24 @@ public class DrawingActivity extends AppCompatActivity implements View.OnClickLi
         fatLineIV.setOnClickListener(this);
         thinLineIV.setOnClickListener(this);
 
+        setDemoImage();
+
 
     }
 
+    private void setDemoImage() {
+        switch (level){
+            case 1: demoImage.setImageResource(R.drawable.anchor);
+            break;
+            case 2: demoImage.setImageResource(R.drawable.wings);
+            break;
+            default: demoImage.setImageResource(R.drawable.ic_mute);
+
+        }
+    }
+
     private void init() {
+        demoImage = findViewById(R.id.showDemo);
         paintView = findViewById(R.id.paintView);
         blackButton = findViewById(R.id.black_color);
         redButton = findViewById(R.id.red_color);
@@ -90,8 +106,7 @@ public class DrawingActivity extends AppCompatActivity implements View.OnClickLi
                 break;
 
             case R.id.submitButton:
-                String result = paintView.getResult();
-                Toast.makeText(this, "Result "+result, Toast.LENGTH_LONG).show();
+                checkResult();
                 break;
 
             case R.id.fatLineIV:
@@ -101,6 +116,20 @@ public class DrawingActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.thinLineIV:
                 paintView.setStrokeWidth(10);
                 break;
+        }
+    }
+
+    private void checkResult() {
+        boolean result = paintView.getResult();
+        if (result){
+            level++;
+            setDemoImage();
+            paintView.initialise(level);
+
+        }
+        else {
+            Toast.makeText(this, "Try Again", Toast.LENGTH_SHORT).show();
+
         }
     }
 }

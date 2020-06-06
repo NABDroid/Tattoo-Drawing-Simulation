@@ -40,9 +40,9 @@ public class PaintView extends View {
     private int strokeWidth;
     private Bitmap mBitmap;
     private Canvas mCanvas;
+    int levelNumber;
     private CursorMachine cursorMachine;
     private Paint mBitmapPaint = new Paint(Paint.DITHER_FLAG);
-    Bitmap referance = BitmapFactory.decodeResource(getResources(), R.drawable.level_one_tattoo);
 
 
 
@@ -71,15 +71,13 @@ public class PaintView extends View {
 
     }
 
-    public void initialise(DisplayMetrics displayMetrics) {
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
+    public void initialise( int levelNumber) {
+//        int height = displayMetrics.heightPixels;
+//        int width = displayMetrics.widthPixels;
+        this.levelNumber = levelNumber;
         cursorMachine = new CursorMachine(getResources());
         mBitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
-
         mCanvas = new Canvas(mBitmap);
-
-
         currentColor = DEFAULT_COLOR;
         strokeWidth = BRUSH_SIZE;
 
@@ -89,10 +87,6 @@ public class PaintView extends View {
     protected void onDraw(Canvas canvas) {
         canvas.save();
         mCanvas.drawColor(backgroundColor); // WRONG
-        referance = Bitmap.createScaledBitmap(referance, 512, 512,false);
-        mCanvas.drawBitmap(referance, 0, 0, mBitmapPaint);
-
-
         for (Draw draw : paths) {
             mPaint.setColor(draw.color); // WRONG
             mPaint.setStrokeWidth(draw.strokeWidth);
@@ -106,7 +100,6 @@ public class PaintView extends View {
         canvas.restore();
 
     }
-
 
     private void touchStart(float x, float y) {
 
@@ -216,11 +209,28 @@ public class PaintView extends View {
     }
 
 
-    public String getResult() {
+    public boolean getResult() {
         int match = 0, unmatch = 0;
         String resultString;
+        Bitmap referance;
         drawingMatrix = new int[512][512];
         referenceMatrix = new int[512][512];
+
+            switch (levelNumber){
+                case 1:
+                    referance = BitmapFactory.decodeResource(getResources(), R.drawable.anchor);
+                    break;
+                case 2:
+                    referance = BitmapFactory.decodeResource(getResources(), R.drawable.wings);
+
+                    break;
+                default:
+                    referance = BitmapFactory.decodeResource(getResources(), R.drawable.ic_mute);
+            }
+
+
+
+
         referance = Bitmap.createScaledBitmap(referance, 512, 512, false);
 
 
@@ -229,17 +239,30 @@ public class PaintView extends View {
                 drawingMatrix[i][j] = mBitmap.getPixel(i, j);
                 referenceMatrix[i][j] = referance.getPixel(i, j);
 
-                if (drawingMatrix[i][j] == referenceMatrix[i][j]) {
-                    match++;
+                if (referenceMatrix[i][j]!=0){
+                    if (drawingMatrix[i][j] == referenceMatrix[i][j]) {
+                        match++;
+                    } else {
+                        unmatch++;
+                    }
                 } else {
-                    unmatch++;
+                    drawingMatrix[i][j] = mBitmap.getPixel(i, j);
+                    if (drawingMatrix[i][j]==-1793418){
+                        match++;
+                    } else {
+                        unmatch++;
+                    }
                 }
+
             }
         }
 
+        Toast.makeText(getContext(), "drawing: "+drawingMatrix[5][511]+" Reference: "+referenceMatrix[5][511], Toast.LENGTH_SHORT).show();
 
-        resultString = "Match: " + match + " Unmatch: " + unmatch;
-
-        return resultString;
+        if (match>unmatch){
+            return true;
+        } else {
+            return false;
+        }
     }
 }

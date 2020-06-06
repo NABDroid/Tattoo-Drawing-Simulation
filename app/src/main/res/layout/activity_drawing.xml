@@ -28,8 +28,7 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:layout_centerInParent="true"
-            android:background="@color/yellow"
-            android:src="@drawable/level_one_tattoo" />
+            android:background="@color/yellow" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -56,18 +55,14 @@
         android:layout_height="512px"
         android:layout_alignRight="@id/paintView"
         android:layout_centerInParent="true"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:background="@color/grey" />
+        android:background="@color/black" />
 
     <View
         android:layout_width="512px"
         android:layout_height="0.5dp"
         android:layout_alignTop="@id/paintView"
         android:layout_centerInParent="true"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:background="@color/grey" />
+        android:background="@color/black" />
 
     <com.nabdroid313.tattoostore.PaintView
         android:id="@+id/paintView"
@@ -83,18 +78,14 @@
         android:layout_height="0.5dp"
         android:layout_alignBottom="@id/paintView"
         android:layout_centerInParent="true"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:background="@color/grey" />
+        android:background="@color/black" />
 
     <View
         android:layout_width="0.5dp"
         android:layout_height="512px"
         android:layout_alignLeft="@id/paintView"
         android:layout_centerInParent="true"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:background="@color/grey" />
+        android:background="@color/black" />
 
 
     <LinearLayout
