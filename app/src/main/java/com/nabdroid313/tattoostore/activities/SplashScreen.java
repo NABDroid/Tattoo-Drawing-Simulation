@@ -30,10 +30,10 @@ public class SplashScreen extends AppCompatActivity {
 
 
     private void doWork(){
-        for (int progress = 1; progress<=20; progress = progress+1){
+        for (int progress = 1; progress<=10; progress = progress+1){
             try {
-                Thread.sleep(50);
-                if (progress>=20){
+                Thread.sleep(20);
+                if (progress>=10){
                     startActivity(new Intent(SplashScreen.this, HomeActivity.class));
                 }
             } catch (InterruptedException e) {

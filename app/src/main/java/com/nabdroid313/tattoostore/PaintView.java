@@ -3,6 +3,7 @@ package com.nabdroid313.tattoostore;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -24,15 +25,14 @@ import java.util.ArrayList;
 public class PaintView extends View {
     public static int BRUSH_SIZE = 10;
     public static final int DEFAULT_COLOR = Color.BLACK;
+
     public static final int DEFAULT_BG_COLOR = Color.rgb(228, 162, 118);
     private static final float TOUCH_TOLERANCE = 4;
 
 
-    private float mX = 300, mY = -300;
-    private float lastX, lastY;
-    private boolean checkSecondTouch = false;
-    private boolean firstTouch = false;
-    private boolean previousTouchExist = false;
+    int[][] drawingMatrix;
+    int[][] referenceMatrix;
+    private float mX, mY;
     private Path mPath;
     private Paint mPaint;
     private int currentColor;
@@ -42,6 +42,9 @@ public class PaintView extends View {
     private Canvas mCanvas;
     private CursorMachine cursorMachine;
     private Paint mBitmapPaint = new Paint(Paint.DITHER_FLAG);
+    Bitmap referance = BitmapFactory.decodeResource(getResources(), R.drawable.level_one_tattoo);
+
+
 
     private ArrayList<Draw> paths = new ArrayList<>();
     private ArrayList<Draw> undo = new ArrayList<>();
@@ -49,6 +52,7 @@ public class PaintView extends View {
     public PaintView(Context context) {
         super(context, null);
         cursorMachine = new CursorMachine(getResources());
+
     }
 
     public PaintView(Context context, AttributeSet attrs) {
@@ -64,15 +68,17 @@ public class PaintView extends View {
         mPaint.setXfermode(null);
         mPaint.setAlpha(0xff);
         cursorMachine = new CursorMachine(getResources());
+
     }
 
     public void initialise(DisplayMetrics displayMetrics) {
-
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
         cursorMachine = new CursorMachine(getResources());
-        mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        mBitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
+
         mCanvas = new Canvas(mBitmap);
+
 
         currentColor = DEFAULT_COLOR;
         strokeWidth = BRUSH_SIZE;
@@ -81,18 +87,18 @@ public class PaintView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-
         canvas.save();
         mCanvas.drawColor(backgroundColor); // WRONG
+        referance = Bitmap.createScaledBitmap(referance, 512, 512,false);
+        mCanvas.drawBitmap(referance, 0, 0, mBitmapPaint);
+
 
         for (Draw draw : paths) {
-
             mPaint.setColor(draw.color); // WRONG
             mPaint.setStrokeWidth(draw.strokeWidth);
             mPaint.setMaskFilter(null);
-
             mCanvas.drawPath(draw.path, mPaint);
-            mCanvas.drawBitmap(cursorMachine.getCursor(), mX, mY-200, mPaint);
+            mCanvas.drawBitmap(cursorMachine.getCursor(), mX, mY - 140, mPaint);
 
         }
 
@@ -103,7 +109,6 @@ public class PaintView extends View {
 
 
     private void touchStart(float x, float y) {
-
 
         mPath = new Path();
 
@@ -116,15 +121,12 @@ public class PaintView extends View {
         mX = x;
         mY = y;
 
-
     }
-
 
     private void touchMove(float x, float y) {
 
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
-
 
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
 
@@ -132,7 +134,6 @@ public class PaintView extends View {
 
             mX = x;
             mY = y;
-
 
         }
 
@@ -142,15 +143,11 @@ public class PaintView extends View {
         mPath.lineTo(mX, mY);
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        float x, y;
-
-
-            x = event.getRawX();
-            y = event.getRawY()-200;
+        float x = event.getX();
+        float y = event.getY();
 
         switch (event.getAction()) {
 
@@ -160,28 +157,18 @@ public class PaintView extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 touchUp();
-                saveLastposition(x, y); //overWrite lastX & lastY
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
-
                 touchMove(x, y);
                 invalidate();
                 break;
 
         }
+
         return true;
+
     }
-
-
-    private void saveLastposition(float x, float y) {
-        lastX = x;
-        lastY = y;
-        Toast.makeText(getContext(), "lastX: "+x+" LastY: "+y, Toast.LENGTH_SHORT).show();
-        previousTouchExist = true;
-    }
-
-
 
     public void clear() {
         backgroundColor = DEFAULT_BG_COLOR;
@@ -205,11 +192,6 @@ public class PaintView extends View {
 
     }
 
-    public void deleteCursor() {
-        setColor(Color.TRANSPARENT);
-
-    }
-
     public void redo() {
 
         if (undo.size() > 0) {
@@ -226,70 +208,38 @@ public class PaintView extends View {
     }
 
     public void setStrokeWidth(int width) {
-
         strokeWidth = width;
-
     }
 
     public void setColor(int color) {
-
         currentColor = color;
-
     }
 
-    @SuppressLint("WrongThread")
-    public void saveImage() {
 
-        int count = 0;
+    public String getResult() {
+        int match = 0, unmatch = 0;
+        String resultString;
+        drawingMatrix = new int[512][512];
+        referenceMatrix = new int[512][512];
+        referance = Bitmap.createScaledBitmap(referance, 512, 512, false);
 
-        File sdDirectory = Environment.getExternalStorageDirectory();
-        File subDirectory = new File(sdDirectory.toString() + "/Pictures/Paint");
 
-        if (subDirectory.exists()) {
+        for (int i = 0; i < 512; i++) {
+            for (int j = 0; j < 512; j++) {
+                drawingMatrix[i][j] = mBitmap.getPixel(i, j);
+                referenceMatrix[i][j] = referance.getPixel(i, j);
 
-            File[] existing = subDirectory.listFiles();
-
-            for (File file : existing) {
-
-                if (file.getName().endsWith(".jpg") || file.getName().endsWith(".png")) {
-
-                    count++;
-
+                if (drawingMatrix[i][j] == referenceMatrix[i][j]) {
+                    match++;
+                } else {
+                    unmatch++;
                 }
-
             }
-
-        } else {
-
-            subDirectory.mkdir();
-
         }
 
-        if (subDirectory.exists()) {
 
-            File image = new File(subDirectory, "/drawing_" + (count + 1) + ".png");
-            FileOutputStream fileOutputStream;
+        resultString = "Match: " + match + " Unmatch: " + unmatch;
 
-            try {
-
-                fileOutputStream = new FileOutputStream(image);
-
-                mBitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
-
-                fileOutputStream.flush();
-                fileOutputStream.close();
-
-                Toast.makeText(getContext(), "saved", Toast.LENGTH_LONG).show();
-
-            } catch (FileNotFoundException e) {
-
-
-            } catch (IOException e) {
-
-
-            }
-
-        }
-
+        return resultString;
     }
 }

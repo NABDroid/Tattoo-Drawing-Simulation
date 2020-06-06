@@ -13,10 +13,12 @@ public class CursorMachine {
 
     public CursorMachine(Resources res) {
         cursor = BitmapFactory.decodeResource(res, R.drawable.cursor);
-        cursor = Bitmap.createScaledBitmap(cursor, 200, 200, false);
+        cursor = Bitmap.createScaledBitmap(cursor, 140, 140, false);
+
     }
 
     Bitmap getCursor(){
         return cursor;
     }
+
 }
